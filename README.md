@@ -20,6 +20,21 @@ set(WIFI_SSID GC_RGB) #Choose any valid name for network
 ````
 Because the purpose of this project is to allow users to access the page as easily as possible, the default configuration is not password-protected. Uncomment the line `set(WIFI_PASSWORD 12345678)` and replace the `12345678` with your desired password, if you wish to password-protect your network.
 
+If you intend on using [VisualGDB](https://visualgdb.com/) to build the app, then you'll also need to change the appropriate options in the [PicoHTTPServer.vgdbproj file](PicoHTTPServer/PicoHTTPServer.vgdbproj):
+````
+<Configuration>
+  <Board>pico_w</Board>
+  <SSID>GC_RGB</SSID>
+  <Password />
+</Configuration>
+````
+
+If you would like to display a custom URL, the settings to do so are contained in the [server_settings.c](PicoHTTPServer/server_settings.c) file. The default address is `gc.rgb`, and the address will be displayed in the format `hostname.domain_name`
+````
+.hostname = "gc",
+.domain_name = "rgb",
+````
+
 For a more detailed explanation of how the HTTP server functions, please read [the original documentation for PicoHTTPServer](https://github.com/sysprogs/PicoHTTPServer).
 
 ### Simple File System
