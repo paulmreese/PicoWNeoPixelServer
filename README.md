@@ -34,7 +34,7 @@ The easiest way to build the sources on Windows is to install [VisualGDB](https:
 
 You can build the project manually by running the [build-all.sh](build-all.sh) file. Make sure you have CMake and GNU Make installed, and that you have the ARM GCC (arm-none-eabi) in the PATH.
 
-Once the project is built, boot your Pico W in bootloader mode. Then, copy the **PicoHTTPServer.uf2** file to it. The Pico W will automatically restart and create a network with the name and password chosen in the `CMakeLists.txt` file.
+Once the project is built, boot your Pico W in bootloader mode. Then, copy the **PicoHTTPServer.uf2** file to it. The Pico W will automatically restart and create a network with the name and password chosen in the [CMakeLists.txt](/PicoHTTPServer/CMakeLists.txt) file.
 
 ## Modifying the App
 
