@@ -85,7 +85,7 @@
         </SDK>
         <Configuration>
           <Board>pico_w</Board>
-          <SSID>PicoHTTP</SSID>
+          <SSID>GC_RGB</SSID>
           <Password />
         </Configuration>
         <UnoptimizeDebugBuilds>true</UnoptimizeDebugBuilds>

@@ -14,8 +14,8 @@ const union
 		.secondary_address = 0x006433c6,	//TEST-NET-2. See the comment before 'secondary_address' definition for details.
 		.network_name = WIFI_SSID,
 		.network_password = WIFI_PASSWORD,
-		.hostname = "picohttp",
-		.domain_name = "piconet.local",
+		.hostname = "gc",
+		.domain_name = "rgb",
 		.dns_ignores_network_suffix = true,
 	}
 };
