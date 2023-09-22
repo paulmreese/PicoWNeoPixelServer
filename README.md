@@ -18,7 +18,7 @@ The Wifi SSID and Password can easily be configured by modifying the CMakeLists.
 set(WIFI_SSID GC_RGB) #Choose any valid name for network
 #set(WIFI_PASSWORD 12345678) #Setting no password leaves the network open
 ````
-Because the purpose of this project is to allow users to access the page as easily as possible, the default configuration is not password-protected. By uncommenting the line `set(WIFI_PASSWORD 12345678)` and replacing the `12345678` with your desired password.
+Because the purpose of this project is to allow users to access the page as easily as possible, the default configuration is not password-protected. Uncomment the line `set(WIFI_PASSWORD 12345678)` and replace the `12345678` with your desired password, if you wish to password-protect your network.
 
 For a more detailed explanation of how the HTTP server functions, please read [the original documentation for PicoHTTPServer](https://github.com/sysprogs/PicoHTTPServer).
 
