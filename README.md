@@ -1,4 +1,4 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 # PicoWNeoPixelServer: Control NeoPixels(WS2812, etc.) from a Raspberry Pi Pico W
 
