@@ -1,456 +1,986 @@
-<html>
-<head>
-<title>Raspberry Pi Pico W Demo</title>
-<style type="text/css">
-body {
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>GameCube RGB Control</title>
+    <style>
+    html, body {
+      margin: 0;
+      width: 100vw;
 
-.main {
-    display: grid;
-    place-items: center;
-}
-
-.header {
-    display: grid;
-    place-items: center;
-}
-
-.pinout {
-    width: 100%;
-    max-width: 960px;
-    min-width: 650px;
-    display: grid;
-    grid-template-columns: auto 1fr auto
-}
-
-.header * {
-    margin: 5px 0px;
-}
-
-.pico_image {
-    width: 100%;
-    grid-column: 2;
-}
-
-.pins {
-    position: relative;
-    top: 3.8%;
-    height: 96%;
-    color: white;
-}
-
-#left_pins {
-    margin: 0 10px 0 0;
-}
-
-#right_pins {
-    margin: 0 0 0 10px;
-}
-
-.pins tr td div {
-    width: 100%;
-    text-align: center;
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-
-.pins tr td {
-    padding: 0 7px;
-}
-
-#left_pins tr td:nth-last-child(1) div, #right_pins tr td:nth-child(1) div {
-    background: #cccccc;
-    color: black;
-    padding-left: 4px;
-    padding-right: 4px;
-}
-
-#left_pins tr td:nth-last-child(2) div, #right_pins tr td:nth-child(2) div {
-    padding-left: 4px;
-    padding-right: 4px;
-}
-
-.gpio_pin {
-    background: #7AC943;
-}
-
-.gnd_pin {
-    background: #000000;
-}
-
-.pwr_pin {
-    background: #E83131;
-}
-
-.dynamic_selector {
-    display: block;
-    border: 1px solid black;
-    margin: -1px 0px;
-}
-
-.pinmode span {
-    padding: 5px 5px;
-    margin: 0px -1px;
-}
-
-.pinvalue span {
-    padding: 5px 10px;
-    margin: 0px -1px;
-}
-
-.selected_value {
-    color: white;
-    background: blue;
-}
-
-.deselected_value {
-    color: black;
-    cursor: pointer;
-}
-
-@media screen and (max-width: 980px) {
-    .pins {
-        font-size: 11px;
+      min-height: 100vh;
+      display: inline-flex;
+      flex-direction: column;
+      align-content: center;
+      align-items: center;
+      flex-wrap: nowrap;
+      overflow-x: hidden;
+      box-sizing: border-box;
+      transition: all ease 0.4s;
     }
-}
 
-@media screen and (max-width: 850px) {
-    .pins {
-        font-size: 11px;
+    /*Hover effects colors and light colors should be inlined */
+
+    html {
+      background-color: #555;
+      justify-content: center;
+      font-family: sans-serif;
     }
-}
 
-@media screen and (max-width: 800px) {
-    .pins {
-        font-size: 8px;
+    body {
+      justify-content: space-between;
+      align-self: center;
+      background: linear-gradient(0deg, #bbb 25%, #eee 30%, #2e004f 30%, #2e004f 30.5%,
+        #2c0069 30.5%, indigo 31.5%, indigo 36%, #7700cf 36%, #6800b5 39%, #6800b5 45%,
+        #090909 45%, #090909 88%, #494949 100% );
+      width: 500px;
+      max-width: 100vw;
+      border-left: 5px solid #3c0069;
+      border-right: 5px solid #3c0069;
+      border-bottom: 5px solid #2e004f;
+
     }
-}
 
-.settings_link {
-    margin: 3px 0px 0px 0px;
-    display: inline-block;
-    vertical-align: top;
-}
+    form span, form div {
+      height: 30px;
+    }
 
-.modal_background {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgb(0,0,0);
-    background-color: rgba(0,0,0,0.4);
-}
-    
-.modal_popup {
-    display: none;
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    box-shadow: 0 5px 10px 0 rgba(0,0,0,0.5),0 10px 20px 0 rgba(0,0,0,0.1);
-}
+    header {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 30px;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0 0;
+      background: linear-gradient(0deg, #ccc 25%);
+    }
 
-.settings_popup {
-    width: 500px;
-}
+    h1 {
+      margin: 0;
+      background: linear-gradient(90deg, #ccc 70%, red 70%, green 86%, blue 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 -1px 0 #666)
+              drop-shadow(0 1px 0 #666)
+              drop-shadow(-1px 0 0 #666)
+              drop-shadow(1px 0 0 #666);
+    }
 
-.error_popup {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    background: red;
-    padding: 30px 30px;
-    color: white;
-}
+    form, #controller_ports {
+      max-width: 500px;
+    }
 
-.reboot_popup {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    background: green;
-    padding: 30px 30px;
-    color: white;
-}
+    label {
+      font-weight: bold;
+      font-size: 1.15em;
+    }
 
-.settings_field {
-    width: 200px;
-}
+    #go_button{
+      margin-top: 20px;
+      transition: all 0.75s ease;
+      filter: drop-shadow(0 0 3px #fff);
+    }
 
-.modal_popup table {
-    margin: 0px auto;
-}
+    #go_button:hover {
+      filter: drop-shadow(0 0 8px #fff);
+    }
 
-.modal_popup h2 {
-    text-align: center;
-}
+    body input.color-picker-overlay {
+      opacity: 0;
+      width: 500px;
+      height: 100px;
+      padding: 0 0 20px 0;
+      position: absolute;
+      z-index: 3;
+    }
 
-.modal_popup div:nth-last-child(1) {
-    text-align: right;
-    margin-top: 20px;
-}
+    #power_container {
+      margin-top: -10px;
+    }
 
-.modal_popup button {
-  background-color: #4CAF50;
-  border: none;
-  color: white;
-  width: 100px;
-  padding: 10px 0;
-  text-align: center;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-}
+    #power_button{
+      width: 500px;
+      height: 100px;
+      padding:0 0 20px 0;
+      margin:0;
+      margin-top: -20px;
+      align-self: center;
+      border-top: 0.5px solid #090909;
+      background: linear-gradient(0deg, rgba(0, 0, 0, 0) 5%, #6800b5 95%, #000 95%);
 
-</style>
-<script language="JavaScript">
+    }
 
-function updateSelector(id, mode) {
-    for (const span of document.getElementById(id).children) {
-        if (span.dataset.option == mode)
-        {
-            span.classList.add("selected_value");
-            span.classList.remove("deselected_value");
+    #power_circles {
+      filter: drop-shadow(0 0 3px #ff191e);
+
+    }
+
+    #power_rgb:focus + #power_button #power_circles,
+    #power_container:hover #power_button #power_circles {
+      filter: drop-shadow(0 0 6px #ff191e);
+    }
+
+    #power_rgb_color {
+      transition: fill 0.75s ease;
+    }
+
+    .lighted_slot, .controller_slot button {
+      transition: all 0.75s ease;
+    }
+
+    form {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 95vw;
+      box-sizing: border-box;
+      margin-bottom: 0;
+      margin-top: -5px;
+      background-color: #090909;
+      color: #ddd;
+    }
+
+    button {
+      border-radius: 50%;
+      border: 2px solid #777;
+      padding: 20px 5px;
+      height: 60px;
+      width: 60px;
+      z-index: 2;
+      cursor: pointer;
+    }
+
+    datalist, datalist * {
+      display: none;
+    }
+
+    .range_option span {
+      height: fit-content;
+      width: 10%;
+      justify-content: center;
+      align-self: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .range_option, .effects_option, #color_palette {
+      display: inline-flex;
+      align-items: center;
+      width: 100%;
+      padding: 5px 0;
+    }
+
+    .range_option, .effects_option {
+      justify-content: space-around;
+    }
+
+    .effects_option label,
+    .effects_option input {
+      width: 200px;
+      max-width: 25%;
+    }
+
+    .range_option label{
+      width: 200px;
+      max-width: 25%;
+    }
+
+    .range_option input {
+      height: 25px;
+      max-width: 70%;
+      filter: drop-shadow(1px 1px 2px #ccc);
+      color: white;
+    }
+
+    .range_option .move_value {
+      display: inline-flex;
+      justify-content: flex-end;
+      width: 300px;
+      max-width: 50%;
+    }
+
+    #color_palette {
+      justify-content: space-around;
+    }
+
+    #controller_ports {
+      display: inline-flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-content: space-between;
+      width: 100vw;
+      height: 80px;
+      padding: 30px 10px 0;
+      margin-bottom: -10px;
+    }
+
+    .controller_slot {
+      display: inline-flex;
+      flex-direction: column;
+      width: 25%;
+      box-sizing: border-box;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .slot_number {
+      position: absolute;
+      top: -20px;
+      display: inline-flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+
+    .number_dot {
+      width: 7px;
+      height: 10px;
+      padding: 0 2px;
+    }
+
+    .controller_slot input.color-picker-overlay {
+      opacity:0;
+      border-radius: 50%;
+      height: 60px;
+      width: 60px;
+      position:absolute;
+      z-index: 3;
+    }
+
+    #port_rgb_1 + #cont_1_light .lighted_slot {
+      background-color: #ff191e;
+    }
+
+    #slot_1 #port_rgb_1 + #cont_1_light {
+      filter: drop-shadow(0 0 3px #ff191e);
+    }
+
+    #port_rgb_1:focus + #cont_1_light,
+    #slot_1:hover #port_rgb_1 + #cont_1_light {
+      filter: drop-shadow(0 0 6px #ff191e);
+    }
+
+    #port_rgb_2 + #cont_2_light .lighted_slot {
+      background-color: #fff;
+    }
+
+    #slot_2 #port_rgb_2 + #cont_2_light {
+      filter: drop-shadow(0 0 3px #fff);
+    }
+
+    #port_rgb_2:focus + #cont_2_light,
+    #slot_2:hover #port_rgb_2 + #cont_2_light {
+      filter: drop-shadow(0 0 6px #fff);
+    }
+
+    #port_rgb_3 + #cont_3_light .lighted_slot {
+      background-color: #ff191e;
+    }
+
+    #slot_3 #port_rgb_3 + #cont_3_light {
+      filter: drop-shadow(0 0 3px #ff191e);
+    }
+
+    #port_rgb_3:focus + #cont_3_light,
+    #slot_3:hover #port_rgb_3 + #cont_3_light {
+      filter: drop-shadow(0 0 6px #ff191e);
+    }
+
+    #port_rgb_4 + #cont_4_light .lighted_slot {
+      background-color: #fff;
+    }
+
+    #slot_4 #port_rgb_4 + #cont_4_light {
+      filter: drop-shadow(0 0 3px #fff);
+    }
+
+    #port_rgb_4:focus + #cont_4_light,
+    #slot_4:hover #port_rgb_4 + #cont_4_light {
+      filter: drop-shadow(0 0 6px #fff);
+    }
+
+    .controller_slot input.color-picker-overlay:hover + button .lighted_slot {
+      background: linear-gradient(-15deg, rgba(200, 200, 200, 0.5) 0%,
+                  rgba(0,0,0,0) 30%, rgba(0,0,0,0) 50%, rgba(48, 48, 48, 0.7) 80%);
+    }
+
+    .controller_slot button {
+      border-radius: 50%;
+      height: 60px;
+      width: 60px;
+      background-color: #333;
+      padding: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .controller_slot button .port_shape {
+      display: inline-flex;
+      position: absolute;
+      width: 120%;
+      height: 20px;
+      top: -8px;
+      left: 0;
+      background-color: #333;
+    }
+
+    .controller_slot button .lighted_slot {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      justify-content: center;
+      background: linear-gradient(-20deg, rgba(200, 200, 200, 0.4) 0%,
+                  rgba(0,0,0,0) 30%, rgba(0,0,0,0) 50%, rgba(48, 48, 48, 0.7) 80%);
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+    }
+
+    .controller_slot button .slot_fingers {
+      display: inline-flex;
+      background-color: #333;
+      width: 37px;
+      height: 10px;
+      margin-top: 40%;
+    }
+
+    footer {
+      /*margin-top: auto;*/
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 105%;
+      padding-bottom: 10px;
+      box-shadow: inset 0 -12px 12px #444;
+    }
+
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>GameCube RGB</h1>
+    </header>
+    <form action="/">
+      <span id="effects_selection" class="effects_option">
+        <label for="effects">Effect:</label>
+        <select name="effects" id="effects" onchange="adjustDisabledInputs(effects_select.selectedIndex);">
+          <option value="set-all">Set All Same</option>
+          <option value="rainbow">Rainbow</option>
+          <option value="rainbow-chase">Rainbow Chase</option>
+          <option value="alt-fade">Alternating Fade</option>
+          <option value="fade-in">Fade In</option>
+          <option value="fade-out">Fade Out</option>
+        </select>
+      </span>
+      <div id="color_palette">
+        <span class="color_choice">
+          <label for="color_1">Color 1:</label>
+          <input type="color" id="color_1">
+        </span>
+        <span class="color_choice">
+          <label for="color_2">Color 2:</label>
+          <input type="color" id="color_2">
+        </span>
+      </div>
+      <span class="range_option">
+        <label for="speed">Speed:</label>
+        <span class="move_value">
+          <input type="range" min="0" max="100" step="1"
+                 value="50" list="speed_values" id="speed"
+                 onchange="setComputedValue(speed_slider, computed_speed);">
+          <datalist id="speed_values">
+            <option value="0" label="0">0</option>
+            <option value="25" label=""></option>
+            <option value="50" label="50">50</option>
+            <option value="75" label=""></option>
+            <option value="100" label="100">100</option>
+          </datalist>
+          <span class="computed_value" id="computed_speed_value">
+            50
+          </span>
+        </span>
+      </span>
+      <span class="range_option">
+        <label for="repetitions">Repetitions:</label>
+        <span class="move_value">
+          <input type="range" min="1" max="20" step="1"
+                 value="1" list="rep_values" id="repetitions"
+                 onchange="setComputedValue(reps_slider, computed_reps);">
+          <datalist id="rep_values">
+            <option value="1" label="0">1</option>
+            <option value="5" label=""></option>
+            <option value="10" label="10">10</option>
+            <option value="15" label=""></option>
+            <option value="20" label="20">20</option>
+          </datalist>
+          <span class="computed_value" id="computed_reps_value">
+            1
+          </span>
+        </span>
+      </span>
+      <span class="range_option">
+        <label for="brightness">Brightness:</label>
+        <span class="move_value">
+          <input type="range" min="0" max="100" step="1"
+                 value="0" list="brightness_values"
+                 id="brightness"
+                 onchange="setComputedValue(brightness_slider, computed_brightness);">
+          <datalist id="brightness_values">
+            <option value="0" label="0">1</option>
+            <option value="25" label=""></option>
+            <option value="50" label="50">50</option>
+            <option value="75" label=""></option>
+            <option value="100" label="100">100</option>
+          </datalist>
+          <span class="computed_value" id="computed_brightness_value">
+            0
+          </span>
+        </span>
+      </span>
+      <button id="go_button">Go</button>
+    </form>
+    <div id="power_container">
+      <input type="color" class="color-picker-overlay" id="power_rgb" value="#ffffff"
+             oninput="setPowerRGB(power_rgb)"/>
+      <svg id=power_button xmlns="http://www.w3.org/2000/svg" version="1.1">
+        <defs>
+          <clipPath id="cut-off-top">
+            <circle cx="100" cy="45" r="38"/>
+          </clipPath>
+        </defs>
+
+        <filter id="filter">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="0">
+            <animate begin="power_container.mouseenter" attributeName="stdDeviation" values="0;5" dur="0.75s" fill="freeze"></animate>
+            <animate begin="power_rgb.focus" attributeName="stdDeviation" values="0;5" dur="0.75s" fill="freeze"></animate>
+            <animate begin="power_container.mouseleave" attributeName="stdDeviation" values="5;0" dur="0.75s" fill="freeze"></animate>
+            <animate begin="power_rgb.blur" attributeName="stdDeviation" values="5;0" dur="0.75s" fill="freeze"></animate>
+          </feGaussianBlur>
+          <feDropShadow stdDeviation="0.2" dx="0" dy="0">
+            <animate begin="power_container.mouseenter" attributeName="dy" values="0;1.6" dur="0.75s"></animate>
+            <animate begin="power_rgb.focus-within" attributeName="dy" values="0;1.6" dur="0.75s"></animate>
+            <animate begin="power_container.mouseleave" attributeName="dy" values="1.6;0" dur="0.75s"></animate>
+            <animate begin="power_rgb.blur" attributeName="dy" values="1.6;0" dur="0.75s"></animate>
+          </feDropShadow>
+          <feMerge>
+            <feMergeNode/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+
+
+          <g stroke="black" stroke-width="2"
+             transform="scale(3.5, 1) translate(-28, -30)" id="power_circles"
+             filter="url(#filter)">
+            <circle id="power_rgb_color" cx="100" cy="50" r="50" clip-path="url(#cut-off-top)" stroke-width="0"
+                    fill="#ff191e" />
+            <circle cx="100" cy="-20" r="90" stroke-width="2" stroke="#3c0069" fill="#090909" />
+
+          </g>
+
+
+      </svg>
+    </div>
+
+    <div id="controller_ports">
+      <div class="controller_slot" id="slot_1">
+        <span class="slot_number">
+          <svg class="number_dot" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg" version="1.1">
+          <!-- This gradient is re-used on every controller slot -->
+              <linearGradient id="number_dot_shadow" gradientUnits="userSpaceOnUse"
+     x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#444;stop-opacity:1" />
+                <stop offset="10%" style="stop-color:#444;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#aaa;stop-opacity:1" />
+              </linearGradient>
+
+            <circle cx="3.5" cy="3.5" r="3.5" stroke-width="0" fill="url(#number_dot_shadow)"/>
+          </svg>
+        </span>
+        <input type="color" class="color-picker-overlay" id="port_rgb_1"
+               value="#ff191e"
+               oninput="setPickedColor(port_rgb_1, cont_1_light);"/>
+        <button id="cont_1_light" tabindex="-1">
+          <span class="lighted_slot">
+            <span class="slot_fingers"></span>
+          </span>
+          <span class="port_shape"></span>
+        </button>
+      </div>
+      <div class="controller_slot" id="slot_2">
+        <span class="slot_number">
+          <svg class="number_dot" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg" version="1.1">
+            <circle cx="3.5" cy="3.5" r="3.5" stroke-width="0" fill="url(#number_dot_shadow)"/>
+          </svg>
+          <svg class="number_dot" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg" version="1.1">
+            <circle cx="3.5" cy="3.5" r="3.5" stroke-width="0" fill="url(#number_dot_shadow)"/>
+          </svg>
+        </span>
+        <input type="color" class="color-picker-overlay" id="port_rgb_2"
+               value="#ffffff"
+               oninput="setPickedColor(port_rgb_2, cont_2_light);"/>
+        <button id="cont_2_light" tabindex="-1">
+          <span class="lighted_slot">
+            <span class="slot_fingers"></span>
+          </span>
+          <span class="port_shape"></span>
+        </button>
+      </div>
+      <div class="controller_slot" id="slot_3">
+        <span class="slot_number">
+          <svg class="number_dot" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg" version="1.1">
+            <circle cx="3.5" cy="3.5" r="3.5" stroke-width="0" fill="url(#number_dot_shadow)"/>
+          </svg>
+          <svg class="number_dot" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg" version="1.1">
+            <circle cx="3.5" cy="3.5" r="3.5" stroke-width="0" fill="url(#number_dot_shadow)"/>
+          </svg>
+          <svg class="number_dot" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg" version="1.1">
+            <circle cx="3.5" cy="3.5" r="3.5" stroke-width="0" fill="url(#number_dot_shadow)"/>
+          </svg>
+        </span>
+        <input type="color" class="color-picker-overlay" id="port_rgb_3"
+               value="#ff191e"
+               oninput="setPickedColor(port_rgb_3, cont_3_light);"/>
+        <button id="cont_3_light" tabindex="-1">
+          <span class="lighted_slot">
+            <span class="slot_fingers"></span>
+          </span>
+          <span class="port_shape"></span>
+        </button>
+      </div>
+      <div class="controller_slot" id="slot_4">
+        <span class="slot_number">
+          <svg class="number_dot" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg" version="1.1">
+            <circle cx="3.5" cy="3.5" r="3.5" stroke-width="0" fill="url(#number_dot_shadow)"/>
+          </svg>
+          <svg class="number_dot" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg" version="1.1">
+            <circle cx="3.5" cy="3.5" r="3.5" stroke-width="0" fill="url(#number_dot_shadow)"/>
+          </svg>
+          <svg class="number_dot" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg" version="1.1">
+            <circle cx="3.5" cy="3.5" r="3.5" stroke-width="0" fill="url(#number_dot_shadow)"/>
+          </svg><svg class="number_dot" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg" version="1.1">
+            <circle cx="3.5" cy="3.5" r="3.5" stroke-width="0" fill="url(#number_dot_shadow)"/>
+          </svg>
+        </span>
+        <input type="color" class="color-picker-overlay" id="port_rgb_4"
+               value="#ffffff"
+               oninput="setPickedColor(port_rgb_4, cont_4_light);"/>
+        <button id="cont_4_light" tabindex="-1">
+          <span class="lighted_slot">
+            <span class="slot_fingers"></span>
+          </span>
+          <span class="port_shape"></span>
+        </button>
+      </div>
+    </div>
+    <footer>
+      ©2023 Paul M Reese
+    </footer>
+
+  </body>
+  <script>
+    const effects_picker = document.getElementById("effects_selection");
+    const effects_select = document.getElementById("effects");
+    const color_picker_1 = document.getElementById("color_1");
+    const color_picker_2 = document.getElementById("color_2");
+    const speed_slider = document.getElementById("speed");
+    const computed_speed = document.getElementById("computed_speed_value");
+    const reps_slider = document.getElementById("repetitions");
+    const computed_reps = document.getElementById("computed_reps_value");
+    const brightness_slider = document.getElementById("brightness");
+    const computed_brightness = document.getElementById("computed_brightness_value");
+    const go_button = document.getElementById("go_button");
+    const power_container = document.getElementById("power_container");
+    const power_rgb = document.getElementById("power_rgb");
+    const power_rgb_color = document.getElementById("power_rgb_color");
+    const power_circles = document.getElementById("power_circles");
+    const cont_slot_1 = document.getElementById("slot_1");
+    const cont_slot_2 = document.getElementById("slot_2");
+    const cont_slot_3 = document.getElementById("slot_3");
+    const cont_slot_4 = document.getElementById("slot_4");
+    const cont_slots = [cont_slot_1, cont_slot_2, cont_slot_3, cont_slot_4];
+
+    function debounce_leading(func, timeout = 300){
+      let timer;
+      return (...args) => {
+        if (!timer) {
+          func.apply(this, args);
         }
-        else
-        {
-            span.classList.add("deselected_value");
-            span.classList.remove("selected_value");
-        }
-    }
-}
-
-function configurePin(id, mode, value) {
-    let xhr = new XMLHttpRequest();
-      
-    xhr.open("GET", `/api/writepin/${id}?${mode}=${value}`, true);
-    xhr.send();
-    updateSelector(id + mode, value);
-}
-
-function setlinks() {
-    for (const line of [["pinmode", ["IN", "OUT"], "d"], ["pinvalue", ["0", "1"], "v"]]) {
-        for (const div of document.getElementsByClassName(line[0])) {
-            div.classList.add("dynamic_selector");
-            for (const option of line[1]) {
-                const span = document.createElement("span");
-                span.appendChild(document.createTextNode(option));
-                span.classList.add("deselected_value");
-                span.dataset.id = div.id.substring(0, div.id.length - 1);
-                span.dataset.mode = line[2];
-                span.dataset.option = option;
-                span.id = div.id + "_" + option;
-                span.onclick = function(event) { configurePin(event.target.dataset.id, event.target.dataset.mode, event.target.dataset.option); };
-                div.appendChild(span);
-            }
-        }
-    }
-}
-
-var last_update_time = Date.now();
-var unrecoverable_error = null;
-
-function show_unrecoverable_error(text) {
-    unrecoverable_error = text;
-    document.getElementById("error_popup").style.display = "block";
-    document.getElementById("error_popup_text").innerHTML = text;
-}
-
-
-function refresh_values() {
-    if (unrecoverable_error)
-        return;
-
-    if ((Date.now() - last_update_time) > 5000) {
-        show_unrecoverable_error("The Raspberry Pi is not responding. Please try restarting it and refresh this page.");
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          timer = undefined;
+        }, timeout);
+      };
     }
 
-    let xhr = new XMLHttpRequest();
-    xhr.open("GET", '/api/readpins', true);
-    xhr.send();
-    xhr.onloadend = function () {
-        let data = JSON.parse(this.responseText);
-        for (const k of Object.keys(data)) {
-            updateSelector(k, data[k]);
-        }
-        
-        last_update_time = Date.now();
-  };  
-}
+    function setComputedValue(input_elem, target_elem) {
+      target_elem.innerText = input_elem.value;
+    }
 
-function init_page() {
-    setlinks();
-    setInterval(refresh_values, 500);
-    
-    window.onclick = function(event) {
-      if (event.target && event.target.classList.contains("modal_background")) {
-          for (const el of document.getElementsByClassName("modal_popup"))
-              el.style.display = "none";
-            document.getElementById("popup_root").style.display = "none";
+    function setPowerRGBNoAJAX(input_elem) {
+      setPowerRGBFromAJAX(input_elem.value);
+    }
+
+    function setPowerRGBFromAJAX(color) {
+      power_rgb_color.style.fill = color;
+      go_button.style.filter = `drop-shadow(0 0 3px ${color})`;
+      power_circles.style.filter = `drop-shadow(0 0 3px ${color})`;
+      replaceHoverAndFocus(go_button, go_button, color);
+      replaceHover(power_container, power_circles, color);
+      replaceFocus(power_rgb, power_circles, color);
+    }
+
+    function setPowerRGB(input_elem) {
+      setPowerRGBNoAJAX(input_elem);
+      // sent to python/ajax here. This will result in "singleled=b"
+      // This will be a type issue for c++, should send a number
+      ajaxRequest(singleAjax(input_elem));
+    }
+
+    function setPickedColorNoAJAX(input_elem, target_elem) {
+      //console.log(target_elem);
+      target_elem.querySelector(".lighted_slot").style.backgroundColor = input_elem.value;
+      //target_elem.style.filter = `drop-shadow(0 0 3px ${input_elem.value})`;
+      syncSingleContSlot(+(input_elem.id.slice(-1))-1);
+    }
+
+    function setPickedColor(input_elem, target_elem) {
+      setPickedColorNoAJAX(input_elem, target_elem);
+      //should be sent to python/ajax here, probably instead of using js ".filter"
+      ajaxRequest(singleAjax(input_elem));
+    }
+
+    function setColorFromAJAX(target_elem, color) {
+      target_elem.querySelector(".lighted_slot").style.backgroundColor = color;
+    }
+
+    function adjustDisabledInputs(idx) {
+      //console.log(idx);
+      switch(idx){
+        case 0:
+            //set-all-same
+            color_picker_1.removeAttribute("disabled");
+            color_picker_2.disabled = true;
+            speed_slider.removeAttribute("disabled");
+            reps_slider.disabled = true;
+            brightness_slider.removeAttribute("disabled");
+            break;
+        case 1:
+            //rainbow
+            color_picker_1.disabled = true;
+            color_picker_2.disabled = true;
+            speed_slider.removeAttribute("disabled");
+            reps_slider.removeAttribute("disabled");
+            brightness_slider.removeAttribute("disabled");
+            break;
+        case 2:
+            //rainbow-chase
+            color_picker_1.disabled = true;
+            color_picker_2.disabled = true;
+            speed_slider.removeAttribute("disabled");
+            reps_slider.removeAttribute("disabled");
+            brightness_slider.removeAttribute("disabled");
+            break;
+        case 3:
+            //alt-fade
+            //enable all
+            color_picker_1.removeAttribute("disabled");
+            color_picker_2.removeAttribute("disabled");
+            speed_slider.removeAttribute("disabled");
+            reps_slider.removeAttribute("disabled");
+            brightness_slider.removeAttribute("disabled");
+            break;
+        case 4:
+            //fade-in
+            color_picker_1.disabled = false;
+            color_picker_2.disabled = true;
+            speed_slider.removeAttribute("disabled");
+            reps_slider.disabled = true;
+            brightness_slider.removeAttribute("disabled");
+            break;
+        case 5:
+            //fade-out
+            color_picker_1.disabled = true;
+            color_picker_2.disabled = true;
+            speed_slider.removeAttribute("disabled");
+            reps_slider.disabled = true;
+            brightness_slider.disabled = true;
       }
     }
-}
 
-function show_settings_popup(show) {
-    update_field_visibility();
-    document.getElementById("popup_root").style.display = show ? "block" : "none";
-    document.getElementById("settings_popup").style.display = show ? "block" : "none";
-}
+    function syncController(slot, color) {
+      cont_slot = cont_slots[slot];
+      overlay = cont_slot.querySelector(".color-picker-overlay");
+      cont_slot_button = cont_slot.querySelector("button");
+      cont_slot_button.style.filter = `drop-shadow(0 0 3px ${color})`;
+      replaceHover(cont_slot, cont_slot_button, color);
+      replaceFocus(overlay, cont_slot_button, color);
+    }
 
-function update_field_visibility() {
-    for (const el of document.getElementsByClassName("dynamic_row"))
-        el.style.display = document.getElementById(el.dataset.condition).checked ? "table-row" : "none";
-}
+    function syncSingleContSlot(slot) {
+      cont_slot_color = cont_slots[slot].querySelector(".color-picker-overlay").value;
+      syncController(slot, cont_slot_color);
+    }
 
-function edit_settings() {
-    let xhr = new XMLHttpRequest();
-    xhr.open("GET", '/api/settings', true);
-    xhr.send();
-    xhr.onloadend = function () {
-        try {
-            let data = JSON.parse(this.responseText);
-            for (const k of Object.keys(data)) {
-                const el = document.getElementById(k);
-                if (el.getAttribute('type') == 'checkbox')
-                    el.checked = data[k];
-                else
-                    el.value = data[k];
-            }
-            
-            show_settings_popup(true);
+    function syncContFromAJAX(slot, color) {
+      syncController(slot, color);
+      setColorFromAJAX(cont_slots[slot], color);
+    }
+
+    function syncAllContSlots() {
+      for (const slot in cont_slots) {
+        syncSingleContSlot(slot)
+      }
+    }
+
+    function syncAllContsFromResponse(response) {
+        setPowerRGBFromAJAX(response.power_rgb);
+        syncContFromAJAX(0, response.port_rgb_1);
+        syncContFromAJAX(1, response.port_rgb_2);
+        syncContFromAJAX(2, response.port_rgb_3);
+        syncContFromAJAX(3, response.port_rgb_4);
+    }
+
+    function syncAllContsSameFromResponse(color) {
+      for (const slot in cont_slots) {
+        syncContFromAJAX(slot, color);
+      }
+    }
+
+    function initialSync() {
+        console.log("sync attempt");
+        // effects_picker.selectedIndex= "{{effect_index}}";
+        // adjustDisabledInputs(0);
+        //computed_speed.innerText = "{{rgb_anim_speed}}";
+        //computed_reps.innerText = "{{rgb_anim_reps}}";
+        //computed_brightness.innerText = "{{rgb_brightness}}";
+        // color_picker_1.value = "{{effect_color_1}}";
+        // color_picker_2.value = "{{effect_color_2}}";
+        // power_rgb_color.fill = "{{power_rgb}}";
+        //Reinvent the hover effect for power & go buttons
+        //This is done purely in SVG
+        //replaceHover(power_container, power_circles, power_rgb_value);
+        //replaceFocus(power_rgb, power_circles, power_rgb_value);
+
+        // Use -1 as initialization pattern
+        ajaxRequest(patternAjax(-1));
+
+        //Go button
+        go_button.removeAttribute("disabled");
+        replaceHoverAndFocus(go_button, go_button, power_rgb.value);
+
+        //Controller slots
+        syncAllContSlots();
+
+    }
+
+    if (document.readyState === "loading") {
+      // Loading hasn't finished yet
+      document.addEventListener("DOMContentLoaded", initialSync);
+    } else {
+      // `DOMContentLoaded` has already fired
+      initialSync();
+    }
+
+    //Reinvent the hover effect
+    function replaceHover(hover_elem, target_elem, value) {
+      hover_elem.addEventListener("mouseenter", (e) => {
+        target_elem.style.filter = `drop-shadow(0 0 10px ${value})`;
+      });
+      hover_elem.addEventListener("mouseleave", (e) => {
+        target_elem.style.filter = `drop-shadow(0 0 3px ${value})`;
+      });
+    }
+    //Reinvent the focus effect
+    function replaceFocus(focus_elem, target_elem, value) {
+      focus_elem.addEventListener("focus", (e) => {
+          //e.preventDefault();
+          target_elem.style.filter = `drop-shadow(0 0 10px ${value})`;
+      });
+      focus_elem.addEventListener("blur", (e) => {
+          target_elem.style.filter = `drop-shadow(0 0 3px ${value})`;
+      });
+    }
+
+    //To be used if the focus and hover element match
+    function replaceHoverAndFocus(elem, target_elem, value) {
+      replaceHover(elem, target_elem, value);
+      replaceFocus(elem, target_elem, value);
+    }
+
+    function removeHoverAndFocus(elem) {
+      elem.removeEventListener("mouseenter");
+      elem.removeEventListener("mouseleave");
+      elem.removeEventListener("focus");
+      elem.removeEventListener("blur");
+    }
+
+    function handleJSONResponse(resp) {
+      response = JSON.parse(resp);
+      console.log(response);
+
+      if (response.effect_type == "pattern") {
+        // Re-enable the go button
+        go_button.removeAttribute("disabled");
+        switch (parseInt(response.effect_index)) {
+          case 0:
+            //This is being set when the effect request is sent, so maybe a thumbs up instead?
+            console.log(response.effect_index + ": Solid Color");
+            const setAllColor = response.power_rgb;
+            console.log(setAllColor);
+            syncAllContsSameFromResponse(setAllColor);
+            //Reflect changes on page for Power LED
+            setPowerRGBFromAJAX(setAllColor);
+            //setPickedColorNoAJAX(rgb_led, port_button)
+            break;
+          case 1:
+            console.log(response.effect_index + ": Rainbow");
+            syncAllContsFromResponse(response)
+            break;
+          case 2:
+            console.log(response.effect_index + ": Rainbow Chase");
+            syncAllContsFromResponse(response)
+            break;
+          case 3:
+            console.log(response.effect_index +": Alternating Fade");
+            syncAllContsFromResponse(response)
+            break;
+          case 4:
+            console.log(response.effect_index + ": Fade In");
+            setPowerRGBFromAJAX(response.power_rgb);
+            syncAllContsSameFromResponse(response.port_rgb_1);
+            break;
+          case 5:
+            console.log(response.effect_index + ": Fade Out");
+            setPowerRGBFromAJAX(response.power_rgb);
+            syncAllContsSameFromResponse(response.port_rgb_1);
+            break;
         }
-        catch(err) {
-            show_unrecoverable_error(err.message);
+      } else if (response.effect_type == "single") {
+        console.log(response.effect_type);
+        const rgb_led = document.getElementById(response.port_id)
+        if (response.port_id == "power_rgb") {
+          //This is being set when the effect request is sent, so maybe a thumbs up instead?
+          power_rgb.value = response.port_color
+          setPowerRGBNoAJAX(power_rgb)
+        } else {
+          //This is being set when the effect request is sent, so maybe a thumbs up instead?
+          const port_button_id = "cont_" + response.port_id.slice(-1) +"_light"
+          const port_button = document.getElementById(port_button_id)
+          rgb_led.value = response.port_color
+          setPickedColorNoAJAX(rgb_led, port_button)
         }
-  };  
-}
+      } else if (response.effect_type == "initial") {
+          //This already defaults correctly, and the change is causing issues
+          //effects_picker.selectedIndex= response.effect_index;
 
-function apply_settings() {
-    let xhr = new XMLHttpRequest();
-    xhr.open("POST", '/api/settings', true);
-    xhr.setRequestHeader("Content-Type", "text/plain");
-    let text = "";
-    for (const el of document.getElementsByClassName("settings_checkbox"))
-        text += `${el.id}=${el.checked}\r\n`;
-    for (const el of document.getElementsByClassName("settings_field"))
-        text += `${el.id}=${el.value}\r\n`;
-    xhr.send(text);
-    xhr.onloadend = function () {
-        if (this.responseText == "OK")
-        {
-            show_settings_popup(false);
-            document.getElementById("reboot_popup").style.display = "block";
-            unrecoverable_error = "rebooting";
+          color_picker_1.value = response.effect_color_1;
+          color_picker_2.value = response.effect_color_2;
+          speed_slider.value = response.rgb_anim_speed;
+          reps_slider.value = response.rgb_anim_reps;
+          brightness_slider.value = response.rgb_anim_brightness;
+          setComputedValue(speed_slider, computed_speed);
+          setComputedValue(reps_slider, computed_reps);
+          setComputedValue(brightness_slider, computed_brightness);
+          adjustDisabledInputs(response.effect_index);
+          syncAllContsFromResponse(response);
+      } else {
+        console.log("invalid response");
+        console.log(response);
+      }
+    }
+
+    //Listeners and functions for AJAX
+
+    //Text-based approach rather than application-based
+    function ajaxRequest(endpointJson) {
+      let xhttp = new XMLHttpRequest();
+      console.log(endpointJson);
+      endPoint = endpointJson[0];
+      request = endpointJson[1];
+      //This is a callback once a response is received
+      xhttp.onload = function () {
+        server_res = xhttp.response
+        console.log(server_res.headers)
+        console.log(server_res);
+        handleJSONResponse(server_res);
+      }
+      xhttp.open("POST", endPoint, true);
+      xhttp.setRequestHeader("Content-Type", "text/plain");
+      xhttp.send(request);
+    }
+
+    function patternAjax(idx) {
+        const endPoint = "effect/";
+        let jsonResponseText = ""
+        jsonResponseText += `effect_index=${idx}`
+        go_button.disabled = true;
+        switch(idx) {
+            //initialize
+            case -1:
+                jsonResponseText += "\r\n";
+                break;
+            //set-all
+            case 0:
+                jsonResponseText += `&color1=${color_picker_1.value}`;
+                jsonResponseText += `&speed=${speed_slider.value}`;
+                jsonResponseText += `&brightness=${brightness_slider.value}\r\n`;
+                break;
+            //rainbow
+            case 1:
+                jsonResponseText += `&speed=${speed_slider.value}`;
+                jsonResponseText += `&reps=${reps_slider.value}`;
+                jsonResponseText += `&brightness=${brightness_slider.value}\r\n`;
+                break;
+            //rainbow chase
+            case 2:
+                jsonResponseText += `&speed=${speed_slider.value}`;
+                jsonResponseText += `&reps=${reps_slider.value}`;
+                jsonResponseText += `&brightness=${brightness_slider.value}\r\n`;
+                break;
+            //alt-fade
+            case 3:
+                jsonResponseText += `&color1=${color_picker_1.value}`;
+                jsonResponseText += `&color2=${color_picker_2.value}`;
+                jsonResponseText += `&speed=${speed_slider.value}`;
+                jsonResponseText += `&reps=${reps_slider.value}`;
+                jsonResponseText += `&brightness=${brightness_slider.value}\r\n`;
+                break;
+            //fade-in
+            case 4:
+                jsonResponseText += `&color1=${color_picker_1.value}`;
+                jsonResponseText += `&speed=${speed_slider.value}`;
+                jsonResponseText += `&brightness=${brightness_slider.value}\r\n`;
+                break;
+            //fade-out
+            case 5:
+                jsonResponseText += `&speed=${speed_slider.value}\r\n`;
         }
-        else
-            alert(this.responseText);
-    };  
-}
+        return [endPoint, jsonResponseText];
+    }
 
-</script>
+    function singleAjax(elem) {
+      port_num = elem.id.slice(-1);
+      //check for b, which is the power led, and assign it a number instead
+      if (port_num == 'b') port_num = 5;
+      endPoint = "singleled/";
+      //console.log("port number: " + port_num);
+      jsonResponseText = `led=${port_num}&color=${elem.value}\r\n`;
+      return [endPoint, jsonResponseText];
+    }
 
-</head>
+    document.querySelector("form").addEventListener("submit", debounce_leading((e) => {
+        e.preventDefault();
+        ajaxRequest(patternAjax(effects_select.selectedIndex));
+    }));
 
-<body onload="init_page()">
-<div class="main">
-<div class="header">
-<h1>Raspberry Pi Pico W Demo <a href="javascript:edit_settings()" class="settings_link"><img style="width: 32px; height: 32px; margin: 0px;" src="img/configure.png"></a></h1>
-<p>Use the selectors below to change the modes and values of GPIO pins:</p>
-</div>
-<div class="pinout">
-    <table id="left_pins" class="pins">
-        <tr><td><div id="gpio0v" class="pinvalue"></div></td><td><div id="gpio0d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO0</div></td><td><div>1</div></td></tr>
-        <tr><td><div id="gpio1v" class="pinvalue"></div></td><td><div id="gpio1d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO1</div></td><td><div>2</div></td></tr>
-        <tr><td></td><td></td><td><div class="gnd_pin">GND</div></td><td><div>3</div></td></tr>
-        <tr><td><div id="gpio2v" class="pinvalue"></div></td><td><div id="gpio2d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO2</div></td><td><div>4</div></td></tr>
-        <tr><td><div id="gpio3v" class="pinvalue"></div></td><td><div id="gpio3d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO3</div></td><td><div>5</div></td></tr>
-        <tr><td><div id="gpio4v" class="pinvalue"></div></td><td><div id="gpio4d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO4</div></td><td><div>6</div></td></tr>
-        <tr><td><div id="gpio5v" class="pinvalue"></div></td><td><div id="gpio5d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO5</div></td><td><div>7</div></td></tr>
-        <tr><td></td><td></td><td><div class="gnd_pin">GND</div></td><td><div>8</div></td></tr>
-        <tr><td><div id="gpio6v" class="pinvalue"></div></td><td><div id="gpio6d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO6</div></td><td><div>9</div></td></tr>
-        <tr><td><div id="gpio7v" class="pinvalue"></div></td><td><div id="gpio7d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO7</div></td><td><div>10</div></td></tr>
-        <tr><td><div id="gpio8v" class="pinvalue"></div></td><td><div id="gpio8d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO8</div></td><td><div>11</div></td></tr>
-        <tr><td><div id="gpio9v" class="pinvalue"></div></td><td><div id="gpio9d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO9</div></td><td><div>12</div></td></tr>
-        <tr><td></td><td></td><td><div class="gnd_pin">GND</div></td><td><div>13</div></td></tr>
-        <tr><td><div id="gpio10v" class="pinvalue"></div></td><td><div id="gpio10d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO10</div></td><td><div>14</div></td></tr>
-        <tr><td><div id="gpio11v" class="pinvalue"></div></td><td><div id="gpio11d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO11</div></td><td><div>15</div></td></tr>
-        <tr><td><div id="gpio12v" class="pinvalue"></div></td><td><div id="gpio12d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO12</div></td><td><div>16</div></td></tr>
-        <tr><td><div id="gpio13v" class="pinvalue"></div></td><td><div id="gpio13d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO13</div></td><td><div>17</div></td></tr>
-        <tr><td></td><td></td><td><div class="gnd_pin">GND</div></td><td><div>18</div></td></tr>
-        <tr><td><div id="gpio14v" class="pinvalue"></div></td><td><div id="gpio14d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO14</div></td><td><div>19</div></td></tr>
-        <tr><td><div id="gpio15v" class="pinvalue"></div></td><td><div id="gpio15d" class="pinmode"></div></td><td><div class="gpio_pin">GPIO15</div></td><td><div>20</div></td></tr>
-    </table>
-    
-    <img src="pinout.svg" class="pico_image"/>
-    
-    <table id="right_pins" class="pins">
-        <tr><td><div>40</div></td><td><div class="pwr_pin">VBUS</div></td><td></td><td></td></tr>
-        <tr><td><div>39</div></td><td><div class="pwr_pin">VSYS</div></td><td></td><td></td></tr>
-        <tr><td><div>38</div></td><td><div class="gnd_pin">GND</div></td><td></td><td></td></tr>
-        <tr><td><div>37</div></td><td><div class="pwr_pin">3V3_EN</div></td><td></td><td></td></tr>
-        <tr><td><div>36</div></td><td><div class="pwr_pin">3V3_OUT</div></td><td></td><td></td></tr>
-        <tr><td><div>35</div></td><td><div class="pwr_pin">ADC_VREF</div></td><td></td><td></td></tr>
-        <tr><td><div>34</div></td><td><div class="gpio_pin">GPIO28</div></td><td><div id="gpio28d" class="pinmode"></div></td><td><div id="gpio28v" class="pinvalue"></div></td></tr>
-        <tr><td><div>33</div></td><td><div class="gnd_pin">GND</div></td><td></td><td></td></tr>
-        <tr><td><div>32</div></td><td><div class="gpio_pin">GPIO27</div></td><td><div id="gpio27d" class="pinmode"></div></td><td><div id="gpio27v" class="pinvalue"></div></td></tr>
-        <tr><td><div>31</div></td><td><div class="gpio_pin">GPIO26</div></td><td><div id="gpio26d" class="pinmode"></div></td><td><div id="gpio26v" class="pinvalue"></div></td></tr>
-        <tr><td><div>30</div></td><td><div class="pwr_pin">RUN</div></td><td></td><td></td></tr>
-        <tr><td><div>29</div></td><td><div class="gpio_pin">GPIO22</div></td><td><div id="gpio22d" class="pinmode"></div></td><td><div id="gpio22v" class="pinvalue"></div></td></tr>
-        <tr><td><div>28</div></td><td><div class="gnd_pin">GND</div></td><td></td><td></td></tr>
-        <tr><td><div>27</div></td><td><div class="gpio_pin">GPIO21</div></td><td><div id="gpio21d" class="pinmode"></div></td><td><div id="gpio21v" class="pinvalue"></div></td></tr>
-        <tr><td><div>26</div></td><td><div class="gpio_pin">GPIO20</div></td><td><div id="gpio20d" class="pinmode"></div></td><td><div id="gpio20v" class="pinvalue"></div></td></tr>
-        <tr><td><div>25</div></td><td><div class="gpio_pin">GPIO19</div></td><td><div id="gpio19d" class="pinmode"></div></td><td><div id="gpio19v" class="pinvalue"></div></td></tr>
-        <tr><td><div>24</div></td><td><div class="gpio_pin">GPIO18</div></td><td><div id="gpio18d" class="pinmode"></div></td><td><div id="gpio18v" class="pinvalue"></div></td></tr>
-        <tr><td><div>23</div></td><td><div class="gnd_pin">GND</div></td><td></td><td></td></tr>
-        <tr><td><div>22</div></td><td><div class="gpio_pin">GPIO17</div></td><td><div id="gpio17d" class="pinmode"></div></td><td><div id="gpio17v" class="pinvalue"></div></td></tr>
-        <tr><td><div>21</div></td><td><div class="gpio_pin">GPIO16</div></td><td><div id="gpio16d" class="pinmode"></div></td><td><div id="gpio16v" class="pinvalue"></div></td></tr>
-    </table>
-</div>
-<div class="header">
-<table>
-<tr><td>Built-in LED state:</td>
-<td><div id="led0v" class="pinvalue" style="padding: 5px 0px;"></div></td></tr>
-</table>
-</div>
+    //go_button.addEventListener("click", ajaxRequest(patternAjax(effects_select.selectedIndex)));
 
-<div class="modal_background" id="popup_root">
-    <div id="settings_popup" class="settings_popup modal_popup">
-        <h2>Demo HTTP server settings</h2>
-        <table>
-            <tr><td>Wi-Fi Network name (SSID):</td><td><input id="ssid" class="settings_field"></td></tr>
-            <tr><td colspan="2"><input id="has_password" type="checkbox" onchange="update_field_visibility()" class="settings_checkbox">Require Wi-Fi password for connecting</td></tr>
-            <tr class="dynamic_row" data-condition="has_password"><td>Wi-Fi Password:</td><td><input id="password" class="settings_field"></td></tr>
-            <tr><td>Host name:</td><td><input id="hostname" class="settings_field"></td></tr>
-            <tr><td colspan="2"><input id="use_domain" type="checkbox" onchange="update_field_visibility()" class="settings_checkbox">Use a connection DNS suffix</td></tr>
-            <tr class="dynamic_row" data-condition="use_domain"><td>DNS suffix:</td><td><input id="domain" class="settings_field"></td></tr>
-            <tr><td colspan="2"><input id="dns_ignores_network_suffix" type="checkbox" class="settings_checkbox">Ignore domain if host name matches</td></tr>
-
-            <tr><td>IP address:</td><td><input id="ipaddr" class="settings_field"></td></tr>
-            <tr><td>Network mask:</td><td><input id="netmask" class="settings_field"></td></tr>
-    
-            <tr><td colspan="2"><input id="use_second_ip" type="checkbox" onchange="update_field_visibility()" class="settings_checkbox">Show 'sign into the network' message</td></tr>
-            <tr class="dynamic_row" data-condition="use_second_ip"><td>Secondary IP address:</td><td><input id="ipaddr2" class="settings_field"></td></tr>
-        </table>
-        <div>
-            <button onclick="apply_settings()">OK</button>
-            <button onclick="show_settings_popup(false)">Cancel</button>
-        </div>
-    </div>
-</div>
-
-<div id="error_popup" class="error_popup modal_popup">
-    <p id="error_popup_text"></p>
-</div>
-
-<div id="reboot_popup" class="reboot_popup modal_popup">
-    <p>The settings have been updated and the device is restarting.<br/>Please disconnect from the Wi-Fi network, reconnect to it and proceed to the network login page.</p>
-</div>
-
-</div>
-</body>
+  </script>
 </html>
