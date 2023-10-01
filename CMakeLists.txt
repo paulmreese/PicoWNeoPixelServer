@@ -12,20 +12,20 @@ add_subdirectory("${PICO_SDK_PATH}/FreeRTOS/portable/ThirdParty/GCC/RP2040" FREE
 # Add webserver files
 add_subdirectory("PicoHTTPServer")
 
+# Set the appropriate compiler options
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(PICO_BOARD pico_w)
 
 if(DEFINED SYSPROGS_FRAMEWORKS_FILE)
 include(${SYSPROGS_FRAMEWORKS_FILE})
 endif()
 
-# Set the appropriate compiler options
-set(PICO_BOARD pico_w)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
-
 if (CMAKE_HOST_WIN32)
-    set(SIMPLE_FS_BUILDER_EXE ${CMAKE_CURRENT_SOURCE_DIR}/../tools/SimpleFSBuilder/SimpleFSBuilder.exe)
+    set(SIMPLE_FS_BUILDER_EXE ${CMAKE_CURRENT_SOURCE_DIR}/tools/SimpleFSBuilder/SimpleFSBuilder.exe)
 else()
-    set(SIMPLE_FS_BUILDER_EXE ${CMAKE_CURRENT_SOURCE_DIR}/../tools/SimpleFSBuilder/build/SimpleFSBuilder)
+    set(SIMPLE_FS_BUILDER_EXE ${CMAKE_CURRENT_SOURCE_DIR}/tools/SimpleFSBuilder/build/SimpleFSBuilder)
 endif()
 
 if (NOT EXISTS ${SIMPLE_FS_BUILDER_EXE})
@@ -59,13 +59,14 @@ function(add_resource_folder target name path)
 endfunction()
 
 add_executable(PicoWNeoPixelServer
-        main.cpp
-        dhcpserver/dhcpserver.c
-        dns/dnsserver.c
-        httpserver.c
-        server_settings.c)
+        example/example.cpp
+        PicoHTTPServer/main.cpp
+        PicoHTTPServer/dhcpserver/dhcpserver.c
+        PicoHTTPServer/dns/dnsserver.c
+        PicoHTTPServer/httpserver.c
+        PicoHTTPServer/server_settings.c)
 
-add_resource_folder(PicoWNeoPixelServer www www)
+add_resource_folder(PicoWNeoPixelServer www ${CMAKE_CURRENT_BINARY_DIR}/../../PicoHTTPServer/www)
 
 target_compile_definitions(PicoWNeoPixelServer PRIVATE NO_SYS=0)
 target_include_directories(PicoWNeoPixelServer PRIVATE
