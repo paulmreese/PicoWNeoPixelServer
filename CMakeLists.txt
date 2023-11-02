@@ -77,9 +77,7 @@ target_include_directories(PicoWNeoPixelServer PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/PicoHTTPServer)
 
 target_link_libraries(PicoWNeoPixelServer
-        PicoHTTPServer
-        pico_stdlib
-        pico_multicore)
+        PicoHTTPServer)
 
 if (TARGET Profiler)
     target_link_libraries(PicoWNeoPixelServer 
